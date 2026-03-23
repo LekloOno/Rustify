@@ -1,0 +1,6 @@
+[workspace]
+members = [
+	"audio_engine",
+	"media_player"
+]
+resolver = "2"

@@ -1,0 +1,7 @@
+[package]
+name = "media_player"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+audio_engine = { path = "../audio_engine" }
