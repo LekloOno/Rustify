@@ -1,5 +1,6 @@
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::thread;
+use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 
 pub enum AudioCommand {
     Play(String),
@@ -31,7 +32,14 @@ impl AudioEngine {
     }
 
     fn audio_thread_loop(rx: Receiver<AudioCommand>) {
-        
+
+        let host = cpal::default_host();
+        let device = host.default_output_device().expect("No output device available");
+        println!("Using output device: {}", device.name().unwrap_or("Unknown".to_string()));
+
+        let config = device.default_output_config().expect("Failed to get default output config");
+        println!("Default output config: {:?}", config);
+
         for cmd in rx {
             match cmd {
                 AudioCommand::Play(file) => {
