@@ -6,7 +6,7 @@ pub struct AudioOutput {
 }
 
 impl AudioOutput {
-    pub fn new(sample_re: Receiver<f32>) -> Self {
+    pub fn new(sample_rx: Receiver<f32>) -> Self {
         let host = cpal::default_host();
         let device = host.default_output_device().expect("No output device available");
         let config = device.default_output_config().expect("Failed to get default output config");
