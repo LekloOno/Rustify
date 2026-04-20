@@ -50,28 +50,36 @@ impl AudioEngine {
         let config = device.default_output_config().expect("Failed to get default output config");
         println!("Default output config: {:?}", config);
 
-        for cmd in rx {
-            match cmd {
-                AudioCommand::Play(file) => {
-                    Self::play_file(&file);
+        loop {
+            if let Ok(cmd) = rx.recv() {
+                match cmd {
+                    AudioCommand::Play(path) => {
+                        println!("Playing file: {}", path);
+                        Self::play_file(&path, &rx);
+                    }
+                    AudioCommand::Pause => {
+                        println!("Pause command received");
+                    }
+                    AudioCommand::Resume => {
+                        println!("Resume command received");
+                    }
+                    AudioCommand::Stop => {
+                        println!("Stop command received");
+                    }
+                    AudioCommand::SetVolume(vol) => {
+                        println!("Set volume to: {}", vol);
+                    }
+                    _ => {
+                        }
                 }
-                AudioCommand::Pause => {
-                    println!("Pausing audio");
-                }
-                AudioCommand::Resume => {
-                    println!("Resuming audio");
-                }
-                AudioCommand::Stop => {
-                    println!("Stopping audio");
-                } 
-                AudioCommand::SetVolume(vol) => {
-                    println!("Setting volume to: {}", (vol * 100.0) as i32);
-                }
+            }
+            else {
+                break;
             }
         }
     }
 
-    fn play_file(path: &str) {
+    fn play_file(path: &str, rx: &Receiver<AudioCommand>) {
         let file= match File::open(path) {
             Ok(f) => f,
             Err(e) => {
@@ -119,7 +127,7 @@ impl AudioEngine {
             &config.into(), 
             move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
                 for sample in data.iter_mut() {
-                    *sample = sample_rx.recv().unwrap_or(0.0);
+                    *sample = sample_rx.try_recv().unwrap_or(0.0);
                 }
             }, 
             |err| eprintln!("Error occurred: {}", err),
@@ -130,33 +138,54 @@ impl AudioEngine {
 
         let mut sample_buf: Option<SampleBuffer<f32>> = None;
 
+        let mut volume: f32 = 1.0;
+        let mut is_paused = false;
+
         loop {
-            let mut packet = format.next_packet().unwrap();
-
-            if packet.track_id() != track_id {
-                continue;
-            }
-
-            match decoder.decode(&packet) {
-                Ok(audio_buf) => {
-                    if sample_buf.is_none() {
-                        let spec = *audio_buf.spec();
-                        let duration = audio_buf.capacity() as u64;
-                        sample_buf = Some(SampleBuffer::<f32>::new(duration, spec));
-                    }
-
-                    if let Some(buf) = &mut sample_buf {
-                        buf.copy_interleaved_ref(audio_buf);
-                        for sample in buf.samples() {
-                            sample_tx.send(*sample).unwrap();
-                        }
+            while let Ok(cmd) = rx.try_recv() {
+                match cmd {
+                    AudioCommand::Pause => is_paused = true,
+                    AudioCommand::Resume => is_paused = false,
+                    AudioCommand::Stop => return,
+                    AudioCommand::SetVolume(v) => volume = v,
+                    AudioCommand::Play(_) => {
+                        eprintln!("Already playing a file. Stop it before playing another.");
                     }
                 }
-                Err(e) => {
-                    eprintln!("Error decoding packet: {}", e);
+            }
+
+                if is_paused {
+                    thread::sleep(std::time::Duration::from_millis(50));
+                    continue;
+                }
+
+                let mut packet = match format.next_packet() {
+                    Ok(p) => p,
+                    Err(_) => break,
+                };
+
+                if packet.track_id() != track_id {
+                    continue;
+                }
+
+                match decoder.decode(&packet) {
+                    Ok(audio_buf) => {
+                        if sample_buf.is_none() {
+                            let spec = *audio_buf.spec();
+                            let duration = audio_buf.capacity() as u64;
+                            sample_buf = Some(SampleBuffer::<f32>::new(duration, spec));
+                        }
+
+                        if let Some(buf) = &mut sample_buf {
+                            buf.copy_interleaved_ref(audio_buf);
+                            for sample in buf.samples() {
+                                let _ = sample_tx.send(*sample * volume);
+                            }
+                        }
+                    }
+                    Err(e) => eprintln!("Error decoding packet: {}", e),
                 }
             }
         }
 
-    }
 }
