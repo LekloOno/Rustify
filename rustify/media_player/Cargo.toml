@@ -5,3 +5,5 @@ edition = "2024"
 
 [dependencies]
 audio_engine = { path = "../audio_engine" }
+slint="1.16.0"
+slint-build="1.16.0"
