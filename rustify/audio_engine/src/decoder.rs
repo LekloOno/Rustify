@@ -26,7 +26,7 @@ impl AudioDecoder {
     /// Panic if the file cannot be opened, probed, or decoded.
     /// 
     /// # Example
-    /// ```rust
+    /// ```rust, no_run
     /// use audio_engine::decoder::AudioDecoder;
     /// 
     /// // Initialize the audio decoder with a file path

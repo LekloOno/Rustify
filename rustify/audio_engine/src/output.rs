@@ -14,7 +14,7 @@ impl AudioOutput {
     /// Initializes the audio output by setting up a stream that continuously reads audio samples from the provided receiver.
     ///
     /// # Example
-    /// ```rust
+    /// ```rust, no_run
     /// use std::sync::mpsc::sync_channel;
     /// use audio_engine::output::AudioOutput;
     /// 

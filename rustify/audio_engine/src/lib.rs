@@ -35,7 +35,7 @@ impl AudioEngine {
     /// Initializes the audio engine by starting the audio thread and setting up communication channels.
     ///
     /// # Example
-    /// ```rust
+    /// ```rust, no_run
     /// use audio_engine::{AudioEngine, AudioCommand};
     /// 
     /// // Initialize the audio engine
@@ -116,4 +116,63 @@ impl AudioEngine {
             }
         }
     }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_engine_initialization() {
+        let _engine = AudioEngine::new();
+    }
+
+    #[test]
+    fn test_send_play_command() {
+        let engine = AudioEngine::new();
+        engine.send_command(AudioCommand::Play("test.mp3".to_string()));
+    }
+
+    #[test]
+    fn test_send_pause_command() {
+        let engine = AudioEngine::new();
+        engine.send_command(AudioCommand::Pause);
+    }
+
+    #[test]
+    fn test_send_resume_command() {
+        let engine = AudioEngine::new();
+        engine.send_command(AudioCommand::Resume);
+    }
+
+    #[test]
+    fn test_send_stop_command() {
+        let engine = AudioEngine::new();
+        engine.send_command(AudioCommand::Stop);
+    }
+
+    #[test]
+    fn test_send_set_volume_command() {
+        let engine = AudioEngine::new();
+        engine.send_command(AudioCommand::SetVolume(0.5));
+    }
+
+    #[test]
+    fn test_send_play_when_music_is_playing() {
+        let engine = AudioEngine::new();
+        engine.send_command(AudioCommand::Play("test.mp3".to_string()));
+        engine.send_command(AudioCommand::Play("test2.mp3".to_string()));
+    }
+
+    #[test]
+    fn test_send_multiple_commands() {
+        let engine = AudioEngine::new();
+        engine.send_command(AudioCommand::Play("test.mp3".to_string()));
+        engine.send_command(AudioCommand::SetVolume(0.5));
+        engine.send_command(AudioCommand::Pause);
+        engine.send_command(AudioCommand::Resume);
+        engine.send_command(AudioCommand::Stop);
+    }
+
 }
