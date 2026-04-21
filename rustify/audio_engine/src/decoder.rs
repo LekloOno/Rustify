@@ -1,3 +1,5 @@
+/// Handles audio decoding using the symphonia crate.
+
 use std::fs::File;
 use std::sync::mpsc::SyncSender;
 use symphonia::core::audio::SampleBuffer;
@@ -7,6 +9,8 @@ use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 
+/// Represents the audio decoder.
+/// It holds the format reader, decoder, and sample buffer.
 pub struct AudioDecoder {
     format: Box<dyn FormatReader>,
     decoder: Box<dyn Decoder>,
@@ -14,7 +18,20 @@ pub struct AudioDecoder {
     sample_buf: Option<SampleBuffer<f32>>,
 }
 
+
 impl AudioDecoder {
+
+    /// Open an audio file and initialize the decoder.
+    /// 
+    /// Panic if the file cannot be opened, probed, or decoded.
+    /// 
+    /// # Example
+    /// ```rust
+    /// use audio_engine::decoder::AudioDecoder;
+    /// 
+    /// // Initialize the audio decoder with a file path
+    /// let decoder = AudioDecoder::new("test.mp3");
+    /// ```
     pub fn new(path: &str) -> Self {
         let file = File::open(path).expect("Failed to open audio file");
         let mss = MediaSourceStream::new(Box::new(file), Default::default());
@@ -48,6 +65,9 @@ impl AudioDecoder {
         }
     }
 
+    /// Decode the next audio packet and send the samples to the provided channel.
+    /// 
+    /// Returns Ok(false) if the end of the file is reached, Ok(true) if decoding is successful, or Err with an error message if an error occurs.
     pub fn decode_next(&mut self, sample_tx: &SyncSender<f32>, volume: f32) -> Result<bool, String> {
         let packet = match self.format.next_packet() {
             Ok(p) => p,

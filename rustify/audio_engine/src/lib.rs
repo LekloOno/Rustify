@@ -1,3 +1,6 @@
+/// Main library file for the audio engine module.
+/// It defines the AudioEngine struct and its associated methods, as well as the AudioCommand enum for controlling playback.
+
 pub mod decoder;
 pub mod output;
 
@@ -7,19 +10,40 @@ use std::thread;
 use decoder::AudioDecoder;
 use output::AudioOutput;
 
+/// Enum representing commands for controlling audio playback.
 pub enum AudioCommand {
+    /// Play a new audio file specified by the path.
     Play(String),
+    /// Pause the current audio playback.
     Pause,
+    /// Resume the paused audio playback.
     Resume,
+    /// Stop the current audio playback.
     Stop,
+    /// Set the playback volume (0.0 to 1.0).
     SetVolume(f32),
 }
 
+/// Represents the audio engine that manages audio playback, decoding, and output.
+/// It runs an audio thread that listens for commands and handles audio processing.
 pub struct AudioEngine {
     command_tx: Sender<AudioCommand>,
 }
 
 impl AudioEngine {
+
+    /// Initializes the audio engine by starting the audio thread and setting up communication channels.
+    ///
+    /// # Example
+    /// ```rust
+    /// use audio_engine::{AudioEngine, AudioCommand};
+    /// 
+    /// // Initialize the audio engine
+    /// let engine = AudioEngine::new();
+    /// 
+    /// // Send a command to play an audio file
+    /// engine.send_command(AudioCommand::Play("test.mp3".to_string()));
+    /// ```
     pub fn new() -> Self {
         let (command_tx, command_rx) = mpsc::channel();
 
@@ -30,12 +54,14 @@ impl AudioEngine {
         AudioEngine { command_tx }
     }
 
+    /// Send a command to the audio engine to control playback.
     pub fn send_command(&self, cmd: AudioCommand) {
         if let Err(e) = self.command_tx.send(cmd) {
             eprintln!("Failed to send command: {}", e);
         }
     }
 
+    /// Main loop for the audio thread that processes commands and handles audio decoding and output.
     fn audio_thread_loop(rx: Receiver<AudioCommand>) {
         let (sample_tx, sample_rx) = sync_channel::<f32>(44100*2);
         let _audio_output = AudioOutput::new(sample_rx);
