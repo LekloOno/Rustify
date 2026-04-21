@@ -26,6 +26,7 @@ pub enum AudioCommand {
 
 /// Represents the audio engine that manages audio playback, decoding, and output.
 /// It runs an audio thread that listens for commands and handles audio processing.
+#[derive(Clone)]
 pub struct AudioEngine {
     command_tx: Sender<AudioCommand>,
 }

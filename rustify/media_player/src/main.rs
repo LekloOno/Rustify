@@ -1,25 +1,35 @@
 use audio_engine::{AudioCommand, AudioEngine};
-use std::thread;
-use std::time::Duration;
+
+slint::include_modules!();
 
 fn main() {
-    println!("Test Starting....");
     let engine = AudioEngine::new();
-    
-    engine.send_command(AudioCommand::Play("test.mp3".to_string()));
-    
-    thread::sleep(Duration::from_secs(3));
-    
-    engine.send_command(AudioCommand::SetVolume(0.2));
-    thread::sleep(Duration::from_secs(3));
+    let ui = AppWindow::new().unwrap();
 
-    engine.send_command(AudioCommand::Pause);
-    thread::sleep(Duration::from_secs(3));
+    let engin_clone_play = engine.clone();
+    ui.on_play_clicked(move || {
+        println!("Play button clicked");
+    });
 
-    engine.send_command(AudioCommand::SetVolume(1.0));
-    engine.send_command(AudioCommand::Resume);
-    thread::sleep(Duration::from_secs(3));
+    let engine_clone_pause = engine.clone();
+    ui.on_pause_clicked(move || {
+        println!("Pause button clicked");
+    });
 
-    engine.send_command(AudioCommand::Stop);
-    thread::sleep(Duration::from_secs(1));
+    let engine_clone_resume = engine.clone();
+    ui.on_resume_clicked(move || {
+        println!("Resume button clicked");
+    });
+
+    let engine_clone_stop = engine.clone();
+    ui.on_stop_clicked(move || {
+        println!("Stop button clicked");
+    });
+
+    let engine_clone_volume = engine.clone();
+    ui.on_volume_changed(move |volume| {
+        println!("Volume changed: {}", volume);
+    });
+
+    ui.run().unwrap();
 }

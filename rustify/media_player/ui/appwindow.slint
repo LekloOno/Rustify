@@ -1,0 +1,67 @@
+// media_player/ui/appwindow.slint
+
+import { Button, Slider, VerticalBox, HorizontalBox } from "std-widgets.slint";
+
+export component AppWindow inherits Window {
+    title: "Rust Audio Player";
+    width: 400px;
+    height: 200px;
+
+    callback play-clicked();
+    callback pause-clicked();
+    callback resume-clicked();
+    callback stop-clicked();
+    callback volume-changed(float);
+
+    in property <string> current-track: "No track loaded";
+
+    VerticalBox {
+        alignment: center;
+        spacing: 15px;
+
+        Text {
+            text: root.current-track;
+            font-size: 16px;
+            horizontal-alignment: center;
+        }
+
+        HorizontalBox {
+            alignment: center;
+
+            Button {
+                text: "Play";
+                clicked => root.play-clicked();
+            }
+
+            Button {
+                text: "Pause";
+                clicked => root.pause-clicked();
+            }
+
+            Button {
+                text: "Resume";
+                clicked => root.resume-clicked();
+            }
+
+            Button {
+                text: "Stop";
+                clicked => root.stop-clicked();
+            }
+        }
+
+        HorizontalBox {
+            alignment: center;
+            Text {
+                text: "Volume";
+                font-size: 14px;
+            }
+
+            Slider {
+                minimum: 0.0;
+                maximum: 1.0;
+                value: 1.0;
+                changed(val) => { root.volume-changed(val) }
+            }
+        }
+    }
+}
