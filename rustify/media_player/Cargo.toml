@@ -6,6 +6,8 @@ edition = "2024"
 [dependencies]
 audio_engine = { path = "../audio_engine" }
 slint="1.16.0"
+walkdir="2.5.0"
+symphonia = { version = "0.5", features = ["all"] }
 
 [build-dependencies]
 slint-build="1.16.0"

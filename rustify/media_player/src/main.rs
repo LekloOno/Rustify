@@ -1,15 +1,35 @@
 use audio_engine::{AudioCommand, AudioEngine};
+use slint::SharedString;
+mod scanner;
 
 slint::include_modules!();
 
 fn main() {
+    let tracks = scanner::scan_directory("./music");
+
     let engine = AudioEngine::new();
     let ui = AppWindow::new().unwrap();
 
+    if let Some(first_track) = tracks.first() {
+        let display_text = format!("{} - {}",
+            first_track.artist.as_deref().unwrap_or("Unknown Artist"),
+            first_track.title.as_deref().unwrap_or("Unknown Title")
+        );
+        ui.set_current_track(SharedString::from(display_text));
+    }
+    else {
+        ui.set_current_track(SharedString::from("No tracks found"));
+    }
+
     let engine_clone_play = engine.clone();
     ui.on_play_clicked(move || {
-        println!("Play button clicked");
-        engine_clone_play.send_command(AudioCommand::Play("test.mp3".to_string()));
+        if let Some(first_track) = tracks.first() {
+            println!("Play button clicked: {}", first_track.path);
+            engine_clone_play.send_command(AudioCommand::Play(first_track.path.clone()));
+        }
+        else {
+            println!("Play button clicked but no tracks found");
+        }
     });
 
     let engine_clone_pause = engine.clone();
