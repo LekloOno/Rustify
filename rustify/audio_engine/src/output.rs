@@ -1,7 +1,8 @@
 /// Handles audio output using the cpal crate.
 
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use std::sync::mpsc::Receiver;
+use ringbuf::HeapCons; 
+use ringbuf::traits::Consumer;
 
 /// Represents the connection to the audio output device.
 /// It holds the audio stream and ensures it remains active while the struct is alive.
@@ -24,7 +25,7 @@ impl AudioOutput {
     /// // Initialize the audio output with the receiver
     /// let output = AudioOutput::new(rx);
     /// ```
-    pub fn new(sample_rx: Receiver<f32>) -> Self {
+    pub fn new(mut sample_rx: HeapCons<f32>) -> Self {
         let host = cpal::default_host();
         let device = host.default_output_device().expect("No output device available");
         let config = device.default_output_config().expect("Failed to get default output config");
@@ -33,7 +34,7 @@ impl AudioOutput {
             &config.into(),
             move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
                 for sample in data.iter_mut() {
-                    *sample = sample_rx.try_recv().unwrap_or(0.0);
+                    *sample = sample_rx.try_pop().unwrap_or(0.0);
                 }
             },
             |err| eprintln!("Stream error: {}", err),

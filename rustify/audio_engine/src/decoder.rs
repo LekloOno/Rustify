@@ -1,13 +1,16 @@
 /// Handles audio decoding using the symphonia crate.
 
 use std::fs::File;
-use std::sync::mpsc::SyncSender;
 use symphonia::core::audio::SampleBuffer;
 use symphonia::core::codecs::{Decoder, DecoderOptions};
 use symphonia::core::formats::{FormatOptions, FormatReader};
 use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
+use ringbuf::HeapProd;
+use ringbuf::traits::{Observer, Producer};
+use std::thread;
+use std::time::Duration;
 
 /// Represents the audio decoder.
 /// It holds the format reader, decoder, and sample buffer.
@@ -68,7 +71,7 @@ impl AudioDecoder {
     /// Decode the next audio packet and send the samples to the provided channel.
     /// 
     /// Returns Ok(false) if the end of the file is reached, Ok(true) if decoding is successful, or Err with an error message if an error occurs.
-    pub fn decode_next(&mut self, sample_tx: &SyncSender<f32>, volume: f32) -> Result<bool, String> {
+    pub fn decode_next(&mut self, sample_tx: &mut HeapProd<f32>, volume: f32) -> Result<bool, String> {
         let packet = match self.format.next_packet() {
             Ok(p) => p,
             Err(symphonia::core::errors::Error::IoError(_)) => {
@@ -94,9 +97,10 @@ impl AudioDecoder {
                 if let Some(buf) = &mut self.sample_buf {
                     buf.copy_interleaved_ref(audio_buf);
                     for sample in buf.samples() {
-                        if sample_tx.send(*sample * volume).is_err() {
-                            return Err("Failed to send sample to audio output".to_string());
+                        while sample_tx.is_full() {
+                            thread::sleep(Duration::from_millis(1));
                         }
+                        let _ = sample_tx.try_push(sample * volume);
                     }
                 }
                 Ok(true)

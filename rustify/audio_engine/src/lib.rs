@@ -6,9 +6,11 @@ pub mod output;
 
 use std::sync::mpsc::{self, Receiver, Sender, sync_channel};
 use std::thread;
+use ringbuf::HeapRb;
 
 use decoder::AudioDecoder;
 use output::AudioOutput;
+use ringbuf::traits::Split;
 
 /// Enum representing commands for controlling audio playback.
 pub enum AudioCommand {
@@ -64,8 +66,12 @@ impl AudioEngine {
 
     /// Main loop for the audio thread that processes commands and handles audio decoding and output.
     fn audio_thread_loop(rx: Receiver<AudioCommand>) {
-        let (sample_tx, sample_rx) = sync_channel::<f32>(44100*2);
+        let ring_buffer = HeapRb::<f32>::new(44100 * 2);
+        let (mut sample_tx, sample_rx) = ring_buffer.split();
+
         let _audio_output = AudioOutput::new(sample_rx);
+
+
         let mut decoder: Option<AudioDecoder> = None;
         let mut is_paused = false;
         let mut volume = 1.0;
@@ -98,7 +104,7 @@ impl AudioEngine {
 
             if !is_paused {
                 if let Some(ref mut dec) = decoder {
-                    match dec.decode_next(&sample_tx, volume) {
+                    match dec.decode_next(&mut sample_tx, volume) {
                         Ok(true) => {}
                         Ok(false) => {
                             println!("Playback finished");
