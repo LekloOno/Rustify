@@ -55,6 +55,6 @@ impl ProcessNode for SineOsc {
 }
 
 impl PullNode for SineOsc {
-    fn connect(&mut self, port: usize, node: usize) {}
-    fn disconnect(&mut self, port: usize) {}
+    fn connect(&mut self, _port: usize, _node: usize) {}
+    fn disconnect(&mut self, _port: usize) {}
 }
