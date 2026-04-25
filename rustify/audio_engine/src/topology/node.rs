@@ -3,6 +3,7 @@ use std::sync::{atomic::{AtomicUsize, Ordering}, mpsc::Sender};
 use crate::process::{command::Command, node::PullProcessNode};
 
 pub mod player;
+pub mod sine_osc;
 
 static GLOBAL_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
 

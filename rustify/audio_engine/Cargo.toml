@@ -6,5 +6,6 @@ edition = "2024"
 [dependencies]
 cpal = "0.17"
 ringbuf = "0.4.8"
+rubato = "2.0.0"
 symphonia = { version = "0.5", features = ["all"] }
 thiserror = "2.0.18"

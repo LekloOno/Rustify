@@ -1,4 +1,4 @@
-use audio_engine::{process::{ProcessThread, node::impls::mixer::MixerNode}, topology::node::{TopologyNode, player::{TopologyPlayer, command::AudioCommand}}};
+use audio_engine::{process::{ProcessThread, node::impls::mixer::MixerNode}, topology::node::{TopologyNode, player::{TopologyPlayer, command::AudioCommand}, sine_osc::TopologySineOsc}};
 use slint::SharedString;
 mod scanner;
 
@@ -16,10 +16,13 @@ fn main() {
 
     decoder2.command_tx.send(AudioCommand::Play("./music\\uhoh2.mp3".to_string()));
 
+    let sine_osc = TopologySineOsc::new(process_tx.clone(), 500.0, 48000.0);
+
     mixer.set_root();
 
-    mixer.connect(0, &decoder.node);
-    mixer.connect(1, &decoder2.node);
+    //mixer.connect(0, &decoder.node);
+    //mixer.connect(1, &decoder2.node);
+    mixer.connect(2, &sine_osc.node);
     
     let ui = AppWindow::new().unwrap();
 
