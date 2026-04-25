@@ -25,6 +25,6 @@ impl ProcessNode for Sink {
 }
 
 impl PullNode for Sink {
-    fn connect(&mut self, port: usize, node_id: usize) {}
-    fn disconnect(&mut self, port: usize) {}
+    fn connect(&mut self, _port: usize, _node_id: usize) {}
+    fn disconnect(&mut self, _port: usize) {}
 }

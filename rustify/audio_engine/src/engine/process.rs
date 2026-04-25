@@ -5,10 +5,8 @@
 pub mod node;
 pub mod command;
 
-use std::{process::Command, sync::{Arc, Mutex}};
+use std::process::Command;
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use ringbuf::HeapCons; 
-use ringbuf::traits::Consumer;
 use std::sync::mpsc::{SyncSender, sync_channel};
 
 use crate::engine::process::node::{ProcessNode, cache::OutputContext, impls::sink::Sink};

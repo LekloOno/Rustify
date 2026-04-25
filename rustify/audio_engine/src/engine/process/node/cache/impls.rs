@@ -40,9 +40,9 @@ impl ProcessNodeCache for VecProcessNodeCache {
 pub struct EmptyProcessNodeCache;
 
 impl ProcessNodeCache for EmptyProcessNodeCache {
-    fn copy<'a>(&self, output_ctx: &mut OutputContext<'a>) -> bool {
+    fn copy<'a>(&self, _output_ctx: &mut OutputContext<'a>) -> bool {
         false
     }
 
-    fn cache<'a>(&mut self, output_ctx: &OutputContext<'a>) {}
+    fn cache<'a>(&mut self, _output_ctx: &OutputContext<'a>) {}
 }
