@@ -18,6 +18,8 @@ impl TopologyNode {
         Self { id, tx }
     }
 
+    pub fn id(&self) -> usize { self.id }
+
     pub fn delete(self) {
         let _ = self.tx.send(Command::DeleteNode { id: self.id });
     }

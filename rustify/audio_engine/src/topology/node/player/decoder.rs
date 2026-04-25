@@ -8,10 +8,6 @@ use symphonia::core::formats::{FormatOptions, FormatReader};
 use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
-use ringbuf::HeapProd;
-use ringbuf::traits::{Observer, Producer};
-use std::thread;
-use std::time::Duration;
 
 /// Represents the audio decoder.
 /// It holds the format reader, decoder, and sample buffer.
@@ -98,7 +94,7 @@ impl AudioDecoder {
                 if let Some(buf) = &mut self.sample_buf {
                     buf.copy_interleaved_ref(audio_buf);
                     for sample in buf.samples() {
-                        sample_tx.send(sample * volume);
+                        let _ = sample_tx.send(sample * volume);
                     }
                 }
                 Ok(true)

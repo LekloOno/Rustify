@@ -1,4 +1,4 @@
-use audio_engine::{process::{ProcessThread}, topology::node::{player::{TopologyPlayer, command::AudioCommand}}};
+use audio_engine::{process::{ProcessThread, node::impls::mixer::MixerNode}, topology::node::{TopologyNode, player::{TopologyPlayer, command::AudioCommand}}};
 use slint::SharedString;
 mod scanner;
 
@@ -10,8 +10,16 @@ fn main() {
     let (process_thread, process_tx) = ProcessThread::new();
 
     let decoder = TopologyPlayer::new(process_tx.clone());
+    let decoder2 = TopologyPlayer::new(process_tx.clone());
 
-    decoder.node.set_root();
+    let mixer = TopologyNode::new(Box::new(MixerNode::new()), process_tx.clone());
+
+    decoder2.command_tx.send(AudioCommand::Play("./music\\uhoh2.mp3".to_string()));
+
+    mixer.set_root();
+
+    mixer.connect(0, &decoder.node);
+    mixer.connect(1, &decoder2.node);
     
     let ui = AppWindow::new().unwrap();
 
