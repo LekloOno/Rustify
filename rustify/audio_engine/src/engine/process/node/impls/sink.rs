@@ -1,4 +1,4 @@
-use crate::engine::process::node::{ProcessNode, PullNode, cache::{OutputContext, ProcessNodeCache, impls::EmptyProcessNodeCache}};
+use crate::engine::process::{ProcessGraph, node::{ProcessNode, PullNode, cache::{OutputContext, ProcessNodeCache, impls::EmptyProcessNodeCache}}};
 
 pub struct Sink {
     cache: EmptyProcessNodeCache,
@@ -21,7 +21,11 @@ impl ProcessNode for Sink {
         &self.cache
     }
 
-    fn process_new<'a>(&mut self, _output_ctx: &mut OutputContext<'a>) {}
+    fn process_new<'a>(
+        &mut self,
+        _output_ctx: &mut OutputContext<'a>,
+        _nodes: &mut ProcessGraph,
+    ) {}
 }
 
 impl PullNode for Sink {

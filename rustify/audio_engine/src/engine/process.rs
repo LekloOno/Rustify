@@ -5,11 +5,63 @@
 pub mod node;
 pub mod command;
 
-use std::process::Command;
+use std::{collections::HashMap};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
 use std::sync::mpsc::{SyncSender, sync_channel};
 
-use crate::engine::process::node::{ProcessNode, cache::OutputContext, impls::sink::Sink};
+use crate::engine::process::{command::Command, node::{PullProcessNode, cache::OutputContext, impls::sink::Sink}};
+
+pub struct ProcessGraph(pub HashMap<usize, Box<dyn PullProcessNode>>);
+
+impl ProcessGraph {
+    pub fn new() -> Self {
+        let root: Box<dyn PullProcessNode> = Box::new(Sink::new());
+        Self(HashMap::from([(0, root)]))
+    }
+
+    pub fn insert(&mut self, id: usize, node: Box<dyn PullProcessNode>) {
+        self.0.insert(id, node);
+    }
+
+    pub fn remove(&mut self, id: usize) {
+        self.0.remove(&id);
+    }
+
+    pub fn connect(&mut self, id: usize, port: usize, input_id: usize) {
+        if let Some(target) = self.0.get_mut(&id) {
+            target.connect(port, input_id);
+        }
+
+    }
+
+    pub fn disconnect(&mut self, id: usize, port: usize) {
+        if let Some(target) = self.0.get_mut(&id) {
+            target.disconnect(port);
+        }
+    }
+}
+
+pub struct Process {
+    pub root: usize,
+    pub nodes: ProcessGraph,
+    frame: usize,
+}
+
+impl Process {
+    fn new() -> Self {
+        Self { root: 0, nodes: ProcessGraph::new(), frame: 0 }
+    }
+
+    fn process<'a>(&mut self, data: &mut [f32]) {
+        let mut output_ctx = OutputContext::new(data, self.frame);
+        self.frame += 1;
+
+        if let Some(mut root) = self.nodes.0.remove(&self.root) {
+            root.process(&mut output_ctx, &mut self.nodes);
+            self.nodes.insert(self.root, root);
+        }
+    }
+}
 
 /// Represents the connection to the audio output device.
 /// It holds the audio stream and ensures it remains active while the struct is alive.
@@ -37,18 +89,18 @@ impl ProcessThread {
         let device = host.default_output_device().expect("No output device available");
         let config = device.default_output_config().expect("Failed to get default output config");
 
-        let mut frame = 0;
-
         let (tx, rx) = sync_channel::<Command>(1024);
-        let mut root = Sink::new();
+        let mut process = Process::new();
 
         let stream = device.build_output_stream (
             &config.into(),
             move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
-                frame += 1;
-                let mut ctx = OutputContext::new(data, frame);
-                
-                root.process(&mut ctx);
+
+                while let Ok(cmd) = rx.try_recv() {
+                    cmd.send(&mut process);
+                }
+
+                process.process(data);
             },
             |err| eprintln!("Stream error: {}", err),
             None,
