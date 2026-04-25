@@ -22,10 +22,6 @@ impl SineOsc {
     }
 
     fn next_sample(&mut self) -> f32 {
-        if let Ok(freq) = self.rx.try_recv() {
-            self.freq = freq;
-        }
-
         let sample = (2.0 * std::f32::consts::PI * self.phase).sin();
         self.phase += self.freq / self.sample_rate;
         self.phase %= 1.0;
@@ -48,6 +44,10 @@ impl ProcessNode for SineOsc {
         output_ctx: &mut crate::process::node::cache::OutputContext<'a>,
         _graph: &mut crate::process::ProcessGraph
     ) {
+        if let Ok(freq) = self.rx.try_recv() {
+            self.freq = freq;
+        }
+        
         output_ctx.output.fill_with(||
             self.next_sample()
         );
