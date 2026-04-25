@@ -1,3 +1,5 @@
+use std::sync::{Arc, Mutex};
+
 /// Handles audio output using the cpal crate.
 
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
@@ -9,7 +11,7 @@ use ringbuf::traits::Consumer;
 pub struct AudioOutput {
     _stream: cpal::Stream,
 }
-
+/* 
 impl AudioOutput {
 
     /// Initializes the audio output by setting up a stream that continuously reads audio samples from the provided receiver.
@@ -25,17 +27,21 @@ impl AudioOutput {
     /// // Initialize the audio output with the receiver
     /// let output = AudioOutput::new(rx);
     /// ```
-    pub fn new(mut sample_rx: HeapCons<f32>) -> Self {
+    pub fn new(pipeline_root: Arc<Mutex<dyn ProcessNode>>) -> Self {
         let host = cpal::default_host();
         let device = host.default_output_device().expect("No output device available");
         let config = device.default_output_config().expect("Failed to get default output config");
 
+        let mut frame = 0;
+
+        let mut graph_cache = HashProcessGraphCache::new();
+
         let stream = device.build_output_stream (
             &config.into(),
             move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
-                for sample in data.iter_mut() {
-                    *sample = sample_rx.try_pop().unwrap_or(0.0);
-                }
+                frame += 1;
+                let mut ctx = OutputContext::new(data, frame);
+                pipeline_root.lock().unwrap().process(&mut ctx, &mut graph_cache);
             },
             |err| eprintln!("Stream error: {}", err),
             None,
@@ -47,4 +53,4 @@ impl AudioOutput {
             _stream: stream,
         }
     }
-}
+}*/

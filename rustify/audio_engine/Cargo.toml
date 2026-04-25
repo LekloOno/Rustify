@@ -7,3 +7,4 @@ edition = "2024"
 cpal = "0.17"
 ringbuf = "0.4.8"
 symphonia = { version = "0.5", features = ["all"] }
+thiserror = "2.0.18"
