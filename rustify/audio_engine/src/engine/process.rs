@@ -97,7 +97,7 @@ impl ProcessThread {
             move |data: &mut [f32], _: &cpal::OutputCallbackInfo| {
 
                 while let Ok(cmd) = rx.try_recv() {
-                    cmd.send(&mut process);
+                    cmd.handle(&mut process);
                 }
 
                 process.process(data);

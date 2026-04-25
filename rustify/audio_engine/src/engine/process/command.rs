@@ -15,7 +15,7 @@ pub enum Command {
 
 impl Command {
     /// Sends and consumes the command
-    pub fn send(self, process: &mut Process) {
+    pub fn handle(self, process: &mut Process) {
         match self {
             Command::CreateNode { id, node }
                 => process.nodes.insert(id, node),
