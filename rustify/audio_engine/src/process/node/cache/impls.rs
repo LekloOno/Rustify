@@ -1,4 +1,4 @@
-use crate::engine::process::node::cache::{OutputContext, ProcessNodeCache};
+use crate::process::node::cache::{OutputContext, ProcessNodeCache};
 
 pub struct VecProcessNodeCache {
     cache: Vec<f32>,

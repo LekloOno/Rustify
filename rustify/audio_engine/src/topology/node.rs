@@ -1,16 +1,18 @@
-use std::sync::{atomic::{AtomicUsize, Ordering}, mpsc::SyncSender};
+use std::sync::{atomic::{AtomicUsize, Ordering}, mpsc::Sender};
 
-use crate::engine::process::{command::Command, node::PullProcessNode};
+use crate::process::{command::Command, node::PullProcessNode};
+
+pub mod player;
 
 static GLOBAL_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
 pub struct TopologyNode {
     id: usize,
-    tx: SyncSender<Command>,
+    tx: Sender<Command>,
 }
 
 impl TopologyNode {
-    pub fn new(node: Box<dyn PullProcessNode>, tx: SyncSender<Command>) -> Self {
+    pub fn new(node: Box<dyn PullProcessNode>, tx: Sender<Command>) -> Self {
         let id = Self::next_id();
         let _ = tx.send(Command::CreateNode { id, node });
         Self { id, tx }

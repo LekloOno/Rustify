@@ -5,11 +5,10 @@
 pub mod node;
 pub mod command;
 
-use std::{collections::HashMap};
+use std::{collections::HashMap, sync::mpsc::{Sender, channel}};
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use std::sync::mpsc::{SyncSender, sync_channel};
 
-use crate::engine::process::{command::Command, node::{PullProcessNode, cache::OutputContext, impls::sink::Sink}};
+use crate::process::{command::Command, node::{PullProcessNode, cache::OutputContext, impls::sink::Sink}};
 
 pub struct ProcessGraph(pub HashMap<usize, Box<dyn PullProcessNode>>);
 
@@ -84,12 +83,12 @@ impl ProcessThread {
     /// // Initialize the audio output with the receiver
     /// let output = AudioOutput::new(rx);
     /// ```
-    pub fn new() -> (Self, SyncSender<Command>) {
+    pub fn new() -> (Self, Sender<Command>) {
         let host = cpal::default_host();
         let device = host.default_output_device().expect("No output device available");
         let config = device.default_output_config().expect("Failed to get default output config");
 
-        let (tx, rx) = sync_channel::<Command>(1024);
+        let (tx, rx) = channel::<Command>();
         let mut process = Process::new();
 
         let stream = device.build_output_stream (
