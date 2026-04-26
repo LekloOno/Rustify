@@ -73,6 +73,20 @@ impl App {
             }
         });
 
+        self.ui.on_resume_player({
+            let handles = self.player_handles.clone();
+
+            move |id| {
+                let mut map = handles.borrow_mut();
+
+                let Some(node) = map.get_mut(&id) else {
+                    return;
+                };
+                
+                let _ = node.command_tx.send(AudioCommand::Resume);
+            }
+        });
+
         self.ui.on_stop_player({
             let handles = self.player_handles.clone();
 
