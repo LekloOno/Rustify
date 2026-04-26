@@ -7,6 +7,7 @@ pub mod player;
 pub mod mixer;
 pub mod sine_osc;
 pub mod gainer;
+pub mod distorsion;
 
 impl App {
     pub fn setup_nodes(self) -> Self {

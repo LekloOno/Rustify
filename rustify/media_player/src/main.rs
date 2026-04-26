@@ -100,6 +100,7 @@ fn main() {
         .setup_mixers()
         .setup_sine_osc()
         .setup_gainer()
+        .setup_distorsion()
         .run();
     
     //ui.set_pans(model.clone().into());
