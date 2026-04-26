@@ -1,17 +1,17 @@
-use std::sync::mpsc::{self, Sender};
+use std::sync::mpsc::{self, Sender, SyncSender};
 
-use crate::{process::{command::Command, node::{PullProcessNode, impls::{distorsion::Distorsion, sine_osc::SineOsc}}}, topology::node::TopologyNode};
+use crate::{process::{command::Command, node::{PullProcessNode, impls::{distorsion::DistorsionNode, sine_osc::SineOscNode}}}, topology::node::TopologyNode};
 
 pub struct TopologyDistorsion {
     pub node: TopologyNode,
-    pub command_tx: Sender<fn(f32) -> f32>,
+    pub command_tx: SyncSender<fn(f32) -> f32>,
 }
 
 impl TopologyDistorsion {
     pub fn new(tx: Sender<Command>, initial_dist: fn(f32) -> f32) -> Self {
-        let (command_tx, command_rx) = mpsc::channel();
+        let (command_tx, command_rx) = mpsc::sync_channel(1);
 
-        let distorter: Box<dyn PullProcessNode> = Box::new(Distorsion::new(command_rx, initial_dist));
+        let distorter: Box<dyn PullProcessNode> = Box::new(DistorsionNode::new(command_rx, initial_dist));
         let node = TopologyNode::new(distorter, tx);
 
         Self {node, command_tx }

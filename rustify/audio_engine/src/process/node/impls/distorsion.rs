@@ -2,14 +2,14 @@ use std::sync::mpsc::Receiver;
 
 use crate::process::node::{ProcessNode, PullNode, cache::impls::VecProcessNodeCache};
 
-pub struct Distorsion {
+pub struct DistorsionNode {
     rx: Receiver<fn(f32) -> f32>,
     source: Option<usize>,
     func: fn(f32) -> f32,
     cache: VecProcessNodeCache,
 }
 
-impl Distorsion {
+impl DistorsionNode {
     pub fn new(rx: Receiver<fn(f32) -> f32>, func: fn(f32) -> f32) -> Self {
         Self {
             rx,
@@ -20,7 +20,7 @@ impl Distorsion {
     }
 }
 
-impl ProcessNode for Distorsion {
+impl ProcessNode for DistorsionNode {
     fn cache_mut(&mut self) -> &mut dyn crate::process::node::cache::ProcessNodeCache {
         &mut self.cache
     }
@@ -56,7 +56,7 @@ impl ProcessNode for Distorsion {
     }
 }
 
-impl PullNode for Distorsion {
+impl PullNode for DistorsionNode {
     fn connect(&mut self, _port: usize, node: usize) {
         self.source = Some(node);
     }

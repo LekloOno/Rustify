@@ -5,6 +5,7 @@ use crate::process::{command::Command, node::PullProcessNode};
 pub mod player;
 pub mod sine_osc;
 pub mod distorsion;
+pub mod gain;
 
 static GLOBAL_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
 

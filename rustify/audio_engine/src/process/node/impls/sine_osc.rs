@@ -2,7 +2,7 @@ use std::sync::mpsc::Receiver;
 
 use crate::process::node::{ProcessNode, PullNode, cache::impls::VecProcessNodeCache};
 
-pub struct SineOsc {
+pub struct SineOscNode {
     rx: Receiver<f32>,
     phase: f32,
     freq: f32,
@@ -10,7 +10,7 @@ pub struct SineOsc {
     cache: VecProcessNodeCache,
 }
 
-impl SineOsc {
+impl SineOscNode {
     pub fn new(rx: Receiver<f32>, freq: f32, sample_rate: f32) -> Self {
         Self {
             rx,
@@ -30,7 +30,7 @@ impl SineOsc {
     }
 }
 
-impl ProcessNode for SineOsc {
+impl ProcessNode for SineOscNode {
     fn cache_mut(&mut self) -> &mut dyn crate::process::node::cache::ProcessNodeCache {
         &mut self.cache
     }
@@ -47,14 +47,14 @@ impl ProcessNode for SineOsc {
         if let Ok(freq) = self.rx.try_recv() {
             self.freq = freq;
         }
-        
+
         output_ctx.output.fill_with(||
             self.next_sample()
         );
     }
 }
 
-impl PullNode for SineOsc {
+impl PullNode for SineOscNode {
     fn connect(&mut self, _port: usize, _node: usize) {}
     fn disconnect(&mut self, _port: usize) {}
 }
