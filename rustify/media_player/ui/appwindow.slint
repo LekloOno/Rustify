@@ -29,7 +29,7 @@ export struct UiGainNode {
     source_id: int,
 }
 
-export struct UiSineOsc {
+export struct UiSineOscNode {
     id: int,
     freq: string,
 }
@@ -75,7 +75,7 @@ export component AppWindow inherits Window {
     callback set_distorsion_mode(int, string);
 
 
-    in property <[UiSineOsc]> sine_oscs;
+    in property <[UiSineOscNode]> sine_oscs;
 
     callback add_sine_osc();
     callback remove_sine_osc(int);

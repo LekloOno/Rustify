@@ -1,4 +1,4 @@
-use audio_engine::{process::{ProcessThread, command::Command}, topology::node::{TopologyNode, panning::TopologyPanning, player::TopologyPlayer}};
+use audio_engine::{process::{ProcessThread, command::Command}, topology::node::{TopologyNode, distorsion::TopologyDistorsion, gain::TopologyGain, panning::TopologyPanning, player::TopologyPlayer, sine_osc::TopologySineOsc}};
 mod scanner;
 
 use slint::VecModel;
@@ -21,6 +21,15 @@ pub struct App {
 
     mixer_handles: Rc<RefCell<HashMap<i32, TopologyNode>>>,
     mixers_model: Rc<VecModel<UiMixerNode>>,
+
+    distorsion_handles: Rc<RefCell<HashMap<i32, TopologyDistorsion>>>,
+    distorsion_model: Rc<VecModel<UiDistorsionNode>>,
+
+    sine_osc_handles: Rc<RefCell<HashMap<i32, TopologySineOsc>>>,
+    sine_oscs_model: Rc<VecModel<UiSineOscNode>>,
+
+    gainer_handles: Rc<RefCell<HashMap<i32, TopologyGain>>>,
+    gainers_model: Rc<VecModel<UiGainNode>>,
 }
 
 impl App {
@@ -42,6 +51,21 @@ impl App {
         let mixers_model =
             Rc::new(VecModel::<UiMixerNode>::default());
 
+        let distorsion_handles: Rc<RefCell<HashMap<i32, TopologyDistorsion>>> =
+            Rc::new(RefCell::new(HashMap::new()));
+        let distorsion_model =
+            Rc::new(VecModel::<UiDistorsionNode>::default());
+
+        let sine_osc_handles: Rc<RefCell<HashMap<i32, TopologySineOsc>>> =
+            Rc::new(RefCell::new(HashMap::new()));
+        let sine_oscs_model =
+            Rc::new(VecModel::<UiSineOscNode>::default());
+
+        let gainer_handles: Rc<RefCell<HashMap<i32, TopologyGain>>> =
+            Rc::new(RefCell::new(HashMap::new()));
+        let gainers_model =
+            Rc::new(VecModel::<UiGainNode>::default());
+
         Self {
             ui,
             process_tx,
@@ -50,7 +74,13 @@ impl App {
             player_handles,
             players_model,
             mixer_handles,
-            mixers_model
+            mixers_model,
+            distorsion_handles,
+            distorsion_model,
+            sine_osc_handles,
+            sine_oscs_model,
+            gainer_handles,
+            gainers_model,
         }
     }
 
@@ -68,6 +98,7 @@ fn main() {
         .setup_pan()
         .setup_player()
         .setup_mixers()
+        .setup_sine_osc()
         .run();
     
     //ui.set_pans(model.clone().into());

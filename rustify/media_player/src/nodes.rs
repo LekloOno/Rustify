@@ -5,6 +5,7 @@ use crate::{App};
 pub mod pan;
 pub mod player;
 pub mod mixer;
+pub mod sine_osc;
 
 impl App {
     pub fn setup_nodes(self) -> Self {
