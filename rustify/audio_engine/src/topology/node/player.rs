@@ -43,7 +43,7 @@ impl TopologyPlayer {
             while let Ok(cmd) = command_rx.try_recv() {
                 match cmd {
                     AudioCommand::Play(path) => {
-                        decoder = Some(AudioDecoder::new(&path));
+                        decoder = AudioDecoder::new(&path).ok();
                         is_paused = false;
                     }
                     AudioCommand::Pause => {

@@ -55,6 +55,7 @@ export component AppWindow inherits Window {
 
     callback add_player();
     callback remove_player(int);
+    callback source_path_changed_player(int, string);
     callback play_player(int, string);
     callback pause_player(int);
     callback stop_player(int);
@@ -157,6 +158,11 @@ export component AppWindow inherits Window {
                             }
                             TextInput {
                                 text: node.source_path;
+
+                                edited => {
+                                    node.source_path = self.text;
+                                    source_path_changed_player(node.id, self.text);
+                                }
                             }
                             HorizontalLayout {
                                 Button {
