@@ -1,6 +1,6 @@
 // media_player/ui/appwindow.slint
 
-import { ListView, Button, Slider, VerticalBox, HorizontalBox } from "std-widgets.slint";
+import { ComboBox, ListView, Button, Slider, VerticalBox, HorizontalBox } from "std-widgets.slint";
 
 export struct UiPanningNode {
     id: int,
@@ -15,6 +15,23 @@ export struct UiPlayerNode {
 
 export struct UiMixerNode {
     id: int,
+}
+
+export struct UiDistorsionNode {
+    id: int,
+    type: string,
+    source_id: int,
+}
+
+export struct UiGainNode {
+    id: int,
+    gain: float,
+    source_id: int,
+}
+
+export struct UiSineOsc {
+    id: int,
+    freq: string,
 }
 
 export component AppWindow inherits Window {
@@ -43,16 +60,38 @@ export component AppWindow inherits Window {
     callback add_mixer();
     callback remove_mixer(int);
 
+
+    in property <[UiGainNode]> gainers;
+
+    callback add_gainer();
+    callback remove_gainer(int);
+    callback set_gain(int, float);
+
+
+    in property <[UiDistorsionNode]> distorsions;
+
+    callback add_distorsion();
+    callback remove_distorsion(int);
+    callback set_distorsion_mode(int, string);
+
+
+    in property <[UiSineOsc]> sine_oscs;
+
+    callback add_sine_osc();
+    callback remove_sine_osc(int);
+    callback set_sine_osc_freq(int, string);
+
+
     VerticalLayout {
         HorizontalBox {
             VerticalBox {
                 Button {
-                    text: "+ Panning Node";
-                    clicked => add_panning();
+                    text: "+ Sine Oscs Node";
+                    clicked => add_sine_osc();
                 }
-
                 ListView {
-                    for node in root.pans : Rectangle {
+                    for node in root.sine_oscs : Rectangle {
+                        
                         VerticalLayout {
                             HorizontalLayout {
                                 Text { text: "Node: " + node.id; }
@@ -64,28 +103,23 @@ export component AppWindow inherits Window {
 
                                 Button {
                                     text: "X";
-                                    clicked => remove_pan_node(node.id);
+                                    clicked => remove_sine_osc(node.id);
                                 }
                             }
-                            HorizontalLayout {
-                                Slider {
-                                    minimum: 0.0;
-                                    maximum: 1.0;
-                                    value: node.pan;
-                                    changed(value) => set_pan(node.id, value);
+                            HorizontalBox {
+                                Text {
+                                    text: "frequency :";
                                 }
-
                                 TextInput {
-                                    text: node.source_id;
-                                    width: 60px;
+                                    text: node.freq;
 
-                                    edited => connect(node.id, 0, self.text);
+                                    edited => set_sine_osc_freq(node.id, self.text);
                                 }
                             }
                         }
                     }
                 }
-            }
+            }          
 
             VerticalBox {
                 Button {
@@ -136,7 +170,7 @@ export component AppWindow inherits Window {
                         }
                     }
                 }
-            }
+            }          
 
             VerticalBox {
                 Button {
@@ -161,14 +195,153 @@ export component AppWindow inherits Window {
                                 }
                             }
                             HorizontalLayout {
-                                spacing: 6px;
+                                spacing: 2px;
 
-                                for i in 10 : TextInput {
-                                    text: -1;
-
-                                    edited => {
-                                        connect(node.id, i, self.text);
+                                for i in 10 : HorizontalBox {
+                                    Text {
+                                        text: "port " + i + ":";
                                     }
+                                    TextInput {
+                                        text: -1;
+
+                                        edited => {
+                                            connect(node.id, i, self.text);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            VerticalBox {
+                Button {
+                    text: "+ Gain Node";
+                    clicked => add_gainer();
+                }
+
+                ListView {
+                    for node in root.gainers : Rectangle {
+                        VerticalLayout {
+                            HorizontalLayout {
+                                Text { text: "Node: " + node.id; }
+
+                                Button {
+                                    text: "Set root";
+                                    clicked => set_root(node.id);
+                                }
+
+                                Button {
+                                    text: "X";
+                                    clicked => remove_gainer(node.id);
+                                }
+                            }
+                            HorizontalLayout {
+                                Slider {
+                                    minimum: 0.0;
+                                    maximum: 3.0;
+                                    value: node.gain;
+                                    changed(value) => set_gain(node.id, value);
+                                }
+
+                                Text {
+                                    text: "source: ";
+                                }
+                                TextInput {
+                                    text: node.source_id;
+                                    width: 60px;
+
+                                    edited => connect(node.id, 0, self.text);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            VerticalBox {
+                Button {
+                    text: "+ Panning Node";
+                    clicked => add_panning();
+                }
+
+                ListView {
+                    for node in root.pans : Rectangle {
+                        VerticalLayout {
+                            HorizontalLayout {
+                                Text { text: "Node: " + node.id; }
+
+                                Button {
+                                    text: "Set root";
+                                    clicked => set_root(node.id);
+                                }
+
+                                Button {
+                                    text: "X";
+                                    clicked => remove_pan_node(node.id);
+                                }
+                            }
+                            HorizontalLayout {
+                                Slider {
+                                    minimum: 0.0;
+                                    maximum: 1.0;
+                                    value: node.pan;
+                                    changed(value) => set_pan(node.id, value);
+                                }
+
+                                Text {
+                                    text: "source: ";
+                                }
+                                TextInput {
+                                    text: node.source_id;
+                                    width: 60px;
+
+                                    edited => connect(node.id, 0, self.text);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            VerticalBox {
+                Button {
+                    text: "+ Distorsion Node";
+                    clicked => add_distorsion();
+                }
+
+                ListView {
+                    for node in root.distorsions : Rectangle {
+                        VerticalLayout {
+                            HorizontalLayout {
+                                Text { text: "Node: " + node.id; }
+
+                                Button {
+                                    text: "Set root";
+                                    clicked => set_root(node.id);
+                                }
+
+                                Button {
+                                    text: "X";
+                                    clicked => remove_distorsion(node.id);
+                                }
+                            }
+                            HorizontalLayout {
+                                ComboBox {
+                                    model: ["None", "Soft clip", "Hard clip", "Cubic", "Overdrive", "Stoopid"];
+
+                                    selected(value) => set_distorsion_mode(node.id, value);
+                                }
+
+                                Text {
+                                    text: "source: ";
+                                }
+                                TextInput {
+                                    text: node.source_id;
+                                    width: 60px;
+
+                                    edited => connect(node.id, 0, self.text);
                                 }
                             }
                         }
