@@ -1,6 +1,6 @@
 use std::sync::mpsc::{self, Sender, SyncSender};
 
-use crate::{process::{command::Command, node::{PullProcessNode, impls::{distorsion::DistorsionNode, sine_osc::SineOscNode}}}, topology::node::TopologyNode};
+use crate::{process::{command::Command, node::{PullProcessNode, impls::{distorsion::DistorsionNode}}}, topology::node::TopologyNode};
 
 pub struct TopologyDistorsion {
     pub node: TopologyNode,

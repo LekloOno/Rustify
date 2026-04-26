@@ -3,7 +3,7 @@ use std::path::Path;
 use walkdir::WalkDir;
 use symphonia::core::io::MediaSourceStream;
 use symphonia::core::probe::Hint;
-use symphonia::core::meta::{MetadataOptions, MetadataRevision};
+use symphonia::core::meta::{MetadataOptions};
 
 #[derive(Debug, Clone)]
 pub struct TrackInfo {
