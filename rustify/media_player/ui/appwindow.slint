@@ -13,6 +13,10 @@ export struct UiPlayerNode {
     source_path: string,
 }
 
+export struct UiMixerNode {
+    id: int,
+}
+
 export component AppWindow inherits Window {
     in property <[UiPanningNode]> pans;
 
@@ -33,7 +37,11 @@ export component AppWindow inherits Window {
     callback stop_player(int);
     callback resume_player(int);
 
-    
+
+    in property <[UiMixerNode]> mixers;
+
+    callback add_mixer();
+    callback remove_mixer(int);
 
     VerticalLayout {
         HorizontalBox {
@@ -123,6 +131,44 @@ export component AppWindow inherits Window {
                                 Button {
                                     text: "Stop";
                                     clicked => stop_player(node.id);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            VerticalBox {
+                Button {
+                    text: "+ Mixer Node";
+                    clicked => add_mixer();
+                }
+                ListView {
+                    for node in root.mixers : Rectangle {
+                        
+                        VerticalLayout {
+                            HorizontalLayout {
+                                Text { text: "Node: " + node.id; }
+
+                                Button {
+                                    text: "Set root";
+                                    clicked => set_root(node.id);
+                                }
+
+                                Button {
+                                    text: "X";
+                                    clicked => remove_mixer(node.id);
+                                }
+                            }
+                            HorizontalLayout {
+                                spacing: 6px;
+
+                                for i in 10 : TextInput {
+                                    text: -1;
+
+                                    edited => {
+                                        connect(node.id, i, self.text);
+                                    }
                                 }
                             }
                         }

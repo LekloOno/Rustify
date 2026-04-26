@@ -4,6 +4,7 @@ use crate::{App};
 
 pub mod pan;
 pub mod player;
+pub mod mixer;
 
 impl App {
     pub fn setup_nodes(self) -> Self {

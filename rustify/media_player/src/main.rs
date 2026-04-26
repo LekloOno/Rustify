@@ -19,22 +19,29 @@ pub struct App {
 
     player_handles: Rc<RefCell<HashMap<i32, TopologyPlayer>>>,
     players_model: Rc<VecModel<UiPlayerNode>>,
+
+    mixer_handles: Rc<RefCell<HashMap<i32, TopologyNode>>>,
+    mixers_model: Rc<VecModel<UiMixerNode>>,
 }
 
 impl App {
     pub fn new(process_tx: Sender<Command>) -> Self {
         let ui = AppWindow::new().unwrap();
+
         let pan_handles: Rc<RefCell<HashMap<i32, TopologyPanning>>> =
             Rc::new(RefCell::new(HashMap::new()));
-
         let pans_model =
             Rc::new(VecModel::<UiPanningNode>::default());
 
         let player_handles: Rc<RefCell<HashMap<i32, TopologyPlayer>>> =
             Rc::new(RefCell::new(HashMap::new()));
-
         let players_model =
             Rc::new(VecModel::<UiPlayerNode>::default());
+
+        let mixer_handles: Rc<RefCell<HashMap<i32, TopologyNode>>> =
+            Rc::new(RefCell::new(HashMap::new()));
+        let mixers_model =
+            Rc::new(VecModel::<UiMixerNode>::default());
 
         Self {
             ui,
@@ -43,6 +50,8 @@ impl App {
             pans_model,
             player_handles,
             players_model,
+            mixer_handles,
+            mixers_model
         }
     }
 
@@ -59,6 +68,7 @@ fn main() {
         .setup_nodes()
         .setup_pan()
         .setup_player()
+        .setup_mixers()
         .run();
     
     //ui.set_pans(model.clone().into());
