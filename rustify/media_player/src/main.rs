@@ -99,6 +99,7 @@ fn main() {
         .setup_player()
         .setup_mixers()
         .setup_sine_osc()
+        .setup_gainer()
         .run();
     
     //ui.set_pans(model.clone().into());
