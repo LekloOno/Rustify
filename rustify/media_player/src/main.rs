@@ -1,8 +1,7 @@
-use audio_engine::{process::{ProcessThread, command::Command, node::impls::{distorsion::cubic_distortion, mixer::MixerNode}}, topology::node::{TopologyNode, distorsion::TopologyDistorsion, gain::TopologyGain, panning::TopologyPanning, player::{TopologyPlayer, command::AudioCommand}, sine_osc::TopologySineOsc}};
-use slint::SharedString;
+use audio_engine::{process::{ProcessThread, command::Command}, topology::node::{TopologyNode, panning::TopologyPanning, player::TopologyPlayer}};
 mod scanner;
 
-use slint::{VecModel, ModelRc, Model};
+use slint::VecModel;
 use std::{cell::RefCell, collections::HashMap, rc::Rc, sync::mpsc::Sender};
 
 slint::include_modules!();
@@ -62,9 +61,9 @@ impl App {
 }
 
 fn main() {
-    let (process_thread, process_tx) = ProcessThread::new();
+    let (_process_thread, process_tx) = ProcessThread::new();
 
-    let app = App::new(process_tx)
+    let _app = App::new(process_tx)
         .setup_nodes()
         .setup_pan()
         .setup_player()
