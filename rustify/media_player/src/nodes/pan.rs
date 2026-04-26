@@ -1,5 +1,5 @@
 use audio_engine::topology::node::panning::TopologyPanning;
-use slint::ModelRc;
+use slint::{Model, ModelRc};
 
 use crate::{App, UiPanningNode};
 
@@ -27,12 +27,22 @@ impl App {
 
         
         self.ui.on_remove_pan_node({
-            let pans_model = self.pans_model.clone();
+            let model = self.pans_model.clone();
             let pan_handles = self.pan_handles.clone();
 
             move |id| {
                 pan_handles.borrow_mut().remove(&id);
-                pans_model.remove(id as usize);
+                
+                if let Some(index) = (0..model.row_count())
+                    .find(|&i| {
+                        model
+                            .row_data(i)
+                            .map(|m| m.id == id)
+                            .unwrap_or(false)
+                    })
+                {
+                    model.remove(index);
+                }
             }
         });
 

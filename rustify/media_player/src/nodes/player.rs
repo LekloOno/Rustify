@@ -1,5 +1,5 @@
 use audio_engine::topology::node::player::{TopologyPlayer, command::AudioCommand};
-use slint::{ModelRc, SharedString};
+use slint::{Model, ModelRc, SharedString};
 
 use crate::App;
 
@@ -31,7 +31,17 @@ impl App {
 
             move |id| {
                 handles.borrow_mut().remove(&id);
-                model.remove(id as usize);
+                
+                if let Some(index) = (0..model.row_count())
+                    .find(|&i| {
+                        model
+                            .row_data(i)
+                            .map(|m| m.id == id)
+                            .unwrap_or(false)
+                    })
+                {
+                    model.remove(index);
+                }
             }
         });
 

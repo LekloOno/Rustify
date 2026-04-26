@@ -1,5 +1,5 @@
-use audio_engine::{process::node::{PullProcessNode, impls::mixer::MixerNode}, topology::node::{TopologyNode, player::{TopologyPlayer, command::AudioCommand}}};
-use slint::{ModelRc, SharedString};
+use audio_engine::{process::node::{PullProcessNode, impls::mixer::MixerNode}, topology::node::{TopologyNode}};
+use slint::{Model, ModelRc};
 
 use crate::App;
 
@@ -31,7 +31,17 @@ impl App {
 
             move |id| {
                 handles.borrow_mut().remove(&id);
-                model.remove(id as usize);
+
+                if let Some(index) = (0..model.row_count())
+                    .find(|&i| {
+                        model
+                            .row_data(i)
+                            .map(|m| m.id == id)
+                            .unwrap_or(false)
+                    })
+                {
+                    model.remove(index);
+                }
             }
         });
 
