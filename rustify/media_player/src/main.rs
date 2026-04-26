@@ -16,6 +16,9 @@ pub struct App {
 
     pan_handles: Rc<RefCell<HashMap<i32, TopologyPanning>>>,
     pans_model: Rc<VecModel<UiPanningNode>>,
+
+    player_handles: Rc<RefCell<HashMap<i32, TopologyPlayer>>>,
+    players_model: Rc<VecModel<UiPlayerNode>>,
 }
 
 impl App {
@@ -27,11 +30,19 @@ impl App {
         let pans_model =
             Rc::new(VecModel::<UiPanningNode>::default());
 
+        let player_handles: Rc<RefCell<HashMap<i32, TopologyPlayer>>> =
+            Rc::new(RefCell::new(HashMap::new()));
+
+        let players_model =
+            Rc::new(VecModel::<UiPlayerNode>::default());
+
         Self {
             ui,
             process_tx,
             pan_handles,
-            pans_model
+            pans_model,
+            player_handles,
+            players_model,
         }
     }
 
@@ -47,6 +58,7 @@ fn main() {
     let app = App::new(process_tx)
         .setup_nodes()
         .setup_pan()
+        .setup_player()
         .run();
     
     //ui.set_pans(model.clone().into());

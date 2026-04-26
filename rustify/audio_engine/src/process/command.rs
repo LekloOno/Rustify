@@ -26,7 +26,7 @@ impl Command {
             Command::DisconnectNode { id, port }
                 => process.nodes.disconnect(id, port),
             Command::SetRootNode { id }
-                => process.root = id,
+                => {println!("oui"); process.root = id;},
         };
     }
 }

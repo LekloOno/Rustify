@@ -17,6 +17,7 @@ export component AppWindow inherits Window {
     in property <[UiPanningNode]> pans;
 
     callback connect(int, int, string);
+    callback set_root(int);
 
     callback add_panning();
     callback remove_pan_node(int);
@@ -27,8 +28,7 @@ export component AppWindow inherits Window {
 
     callback add_player();
     callback remove_player(int);
-    callback set_player_path(int, string);
-    callback play_player(int);
+    callback play_player(int, string);
     callback pause_player(int);
     callback stop_player(int);
     callback resume_player(int);
@@ -45,26 +45,34 @@ export component AppWindow inherits Window {
 
                 ListView {
                     for node in root.pans : Rectangle {
-                        height: 40px;
+                        VerticalLayout {
+                            HorizontalLayout {
+                                Text { text: "Node: " + node.id; }
 
-                        HorizontalLayout {
-                            Text { text: "Node: " + node.id; }
+                                Button {
+                                    text: "Set root";
+                                    clicked => set_root(node.id);
+                                }
 
-                            Slider {
-                                value: node.pan;
-                                changed(value) => set_pan(node.id, value);
+                                Button {
+                                    text: "X";
+                                    clicked => remove_pan_node(node.id);
+                                }
                             }
+                            HorizontalLayout {
+                                Slider {
+                                    minimum: 0.0;
+                                    maximum: 1.0;
+                                    value: node.pan;
+                                    changed(value) => set_pan(node.id, value);
+                                }
 
-                            TextInput {
-                                text: node.source_id;
-                                width: 60px;
+                                TextInput {
+                                    text: node.source_id;
+                                    width: 60px;
 
-                                edited => connect(node.id, 0, self.text);
-                            }
-
-                            Button {
-                                text: "X";
-                                clicked => remove_pan_node(node.id);
+                                    edited => connect(node.id, 0, self.text);
+                                }
                             }
                         }
                     }
@@ -78,16 +86,14 @@ export component AppWindow inherits Window {
                 }
                 ListView {
                     for node in root.players : Rectangle {
-                        height: 40px;
+                        
                         VerticalLayout {
                             HorizontalLayout {
                                 Text { text: "Node: " + node.id; }
 
-                                TextInput {
-                                    text: node.source_path;
-                                    width: 60px;
-
-                                    edited => set_player_path(node.id, self.text);
+                                Button {
+                                    text: "Set root";
+                                    clicked => set_root(node.id);
                                 }
 
                                 Button {
@@ -95,10 +101,13 @@ export component AppWindow inherits Window {
                                     clicked => remove_player(node.id);
                                 }
                             }
+                            TextInput {
+                                text: node.source_path;
+                            }
                             HorizontalLayout {
                                 Button {
                                     text: "Play";
-                                    clicked => play_player(node.id);
+                                    clicked => play_player(node.id, node.source_path);
                                 }
 
                                 Button {

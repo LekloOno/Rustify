@@ -1,9 +1,9 @@
 use audio_engine::process::command::Command;
-use slint::Model;
 
 use crate::{App};
 
 pub mod pan;
+pub mod player;
 
 impl App {
     pub fn setup_nodes(self) -> Self {
@@ -25,6 +25,16 @@ impl App {
                         port: port as usize
                     });
                 }
+            }
+        });
+
+        self.ui.on_set_root({
+            let process_tx = self.process_tx.clone();
+
+            
+            move |id| {
+                println!("Setting root node: {id}");
+                let _ = process_tx.send(Command::SetRootNode { id: id as usize });
             }
         });
 

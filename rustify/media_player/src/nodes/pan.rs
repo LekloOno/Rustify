@@ -36,6 +36,20 @@ impl App {
             }
         });
 
+        self.ui.on_set_pan({
+            let handles = self.pan_handles.clone();
+
+            move |id, pan| {
+                let mut map = handles.borrow_mut();
+
+                let Some(node) = map.get_mut(&id) else {
+                    return;
+                };
+                
+                let _ = node.command_tx.send(pan);
+            }
+        });
+
         self
     }
 }
