@@ -1,10 +1,56 @@
-use audio_engine::{process::{ProcessThread, node::impls::{distorsion::cubic_distortion, mixer::MixerNode}}, topology::node::{TopologyNode, distorsion::TopologyDistorsion, gain::TopologyGain, panning::TopologyPanning, player::{TopologyPlayer, command::AudioCommand}, sine_osc::TopologySineOsc}};
+use audio_engine::{process::{ProcessThread, command::Command, node::impls::{distorsion::cubic_distortion, mixer::MixerNode}}, topology::node::{TopologyNode, distorsion::TopologyDistorsion, gain::TopologyGain, panning::TopologyPanning, player::{TopologyPlayer, command::AudioCommand}, sine_osc::TopologySineOsc}};
 use slint::SharedString;
 mod scanner;
 
+use slint::{VecModel, ModelRc, Model};
+use std::{cell::RefCell, collections::HashMap, rc::Rc, sync::mpsc::Sender};
+
 slint::include_modules!();
 
+mod nodes;
+
+pub struct App {
+    ui: AppWindow,
+    
+    process_tx: Sender<Command>,
+
+    pan_handles: Rc<RefCell<HashMap<i32, TopologyPanning>>>,
+    pans_model: Rc<VecModel<UiPanningNode>>,
+}
+
+impl App {
+    pub fn new(process_tx: Sender<Command>) -> Self {
+        let ui = AppWindow::new().unwrap();
+        let pan_handles: Rc<RefCell<HashMap<i32, TopologyPanning>>> =
+            Rc::new(RefCell::new(HashMap::new()));
+
+        let pans_model =
+            Rc::new(VecModel::<UiPanningNode>::default());
+
+        Self {
+            ui,
+            process_tx,
+            pan_handles,
+            pans_model
+        }
+    }
+
+    pub fn run(self) -> Self {
+        self.ui.run().unwrap();
+        self
+    }
+}
+
 fn main() {
+    let (process_thread, process_tx) = ProcessThread::new();
+
+    let app = App::new(process_tx)
+        .setup_nodes()
+        .setup_pan()
+        .run();
+    
+    //ui.set_pans(model.clone().into());
+/* 
     let tracks = scanner::scan_directory("./music");
 
     let (process_thread, process_tx) = ProcessThread::new();
@@ -34,6 +80,59 @@ fn main() {
     //mixer.connect(2, &sine_osc.node);
     
     let ui = AppWindow::new().unwrap();
+
+    ui.on_add_panning_node({
+        let model = model.clone();
+        let nodes = nodes.clone(); // Arc<Mutex<AppState>> typically
+
+        move || {
+            let id = state.next_id;
+            state.next_id += 1;
+
+            let panning = TopologyPanning::new(process_tx.clone(), 0.0);
+
+            let tx = panning.command_tx.clone();
+
+            nodes.insert(id, PanningHandle {
+                node: panning,
+                tx,
+            });
+
+            model.push(PanningItem {
+                id,
+                pan: 0.0,
+            });
+        }
+    });
+
+    ui.on_pan_changed({
+        let nodes = nodes.clone();
+
+        move |id, value| {
+            if let Some(handle) = nodes.lock().unwrap().get(&id) {
+                let _ = handle.tx.send(value);
+            }
+        }
+    });
+
+    ui.on_remove_node({
+        let nodes = nodes.clone();
+        let model = model.clone();
+
+        move |id| {
+            nodes.lock().unwrap().remove(&id);
+
+            let index = model.iter().position(|x| x.id == id);
+            if let Some(i) = index {
+                model.remove(i);
+            }
+        }
+    });
+
+    let panning_changed = panning.command_tx.clone();
+    ui.on_pan_changed(move |pan| {
+        panning_changed.send(pan);
+    });
 
     if let Some(first_track) = tracks.first() {
         let display_text = format!("{} - {}",
@@ -79,7 +178,5 @@ fn main() {
     ui.on_volume_changed(move |volume| {
         println!("Volume changed: {}", volume);
         engine_clone_volume.send(AudioCommand::SetVolume(volume));
-    });
-
-    ui.run().unwrap();
+    });*/
 }

@@ -1,66 +1,124 @@
 // media_player/ui/appwindow.slint
 
-import { Button, Slider, VerticalBox, HorizontalBox } from "std-widgets.slint";
+import { ListView, Button, Slider, VerticalBox, HorizontalBox } from "std-widgets.slint";
+
+export struct UiPanningNode {
+    id: int,
+    pan: float,
+    source_id: int,
+}
+
+export struct UiPlayerNode {
+    id: int,
+    source_path: string,
+}
 
 export component AppWindow inherits Window {
-    title: "Rust Audio Player";
-    width: 400px;
-    height: 200px;
+    in property <[UiPanningNode]> pans;
 
-    callback play-clicked();
-    callback pause-clicked();
-    callback resume-clicked();
-    callback stop-clicked();
-    callback volume-changed(float);
+    callback connect(int, int, string);
 
-    in property <string> current-track: "No track loaded";
+    callback add_panning();
+    callback remove_pan_node(int);
+    callback set_pan(int, float);
 
-    VerticalBox {
-        alignment: center;
-        spacing: 15px;
 
-        Text {
-            text: root.current-track;
-            font-size: 16px;
-            horizontal-alignment: center;
-        }
+    in property <[UiPlayerNode]> players;
 
+    callback add_player();
+    callback remove_player(int);
+    callback set_player_path(int, string);
+    callback play_player(int);
+    callback pause_player(int);
+    callback stop_player(int);
+    callback resume_player(int);
+
+    
+
+    VerticalLayout {
         HorizontalBox {
-            alignment: center;
+            VerticalBox {
+                Button {
+                    text: "+ Panning Node";
+                    clicked => add_panning();
+                }
 
-            Button {
-                text: "Play";
-                clicked => root.play-clicked();
+                ListView {
+                    for node in root.pans : Rectangle {
+                        height: 40px;
+
+                        HorizontalLayout {
+                            Text { text: "Node: " + node.id; }
+
+                            Slider {
+                                value: node.pan;
+                                changed(value) => set_pan(node.id, value);
+                            }
+
+                            TextInput {
+                                text: node.source_id;
+                                width: 60px;
+
+                                edited => connect(node.id, 0, self.text);
+                            }
+
+                            Button {
+                                text: "X";
+                                clicked => remove_pan_node(node.id);
+                            }
+                        }
+                    }
+                }
             }
 
-            Button {
-                text: "Pause";
-                clicked => root.pause-clicked();
-            }
+            VerticalBox {
+                Button {
+                    text: "+ Player Node";
+                    clicked => add_player();
+                }
+                ListView {
+                    for node in root.players : Rectangle {
+                        height: 40px;
+                        VerticalLayout {
+                            HorizontalLayout {
+                                Text { text: "Node: " + node.id; }
 
-            Button {
-                text: "Resume";
-                clicked => root.resume-clicked();
-            }
+                                TextInput {
+                                    text: node.source_path;
+                                    width: 60px;
 
-            Button {
-                text: "Stop";
-                clicked => root.stop-clicked();
-            }
-        }
+                                    edited => set_player_path(node.id, self.text);
+                                }
 
-        HorizontalBox {
-            alignment: center;
-            Text {
-                text: "Volume";
-                font-size: 14px;
-            }
+                                Button {
+                                    text: "X";
+                                    clicked => remove_player(node.id);
+                                }
+                            }
+                            HorizontalLayout {
+                                Button {
+                                    text: "Play";
+                                    clicked => play_player(node.id);
+                                }
 
-            Slider {
-                minimum: 0.0;
-                maximum: 1.0;
-                value: 1.0;
-                changed(val) => { root.volume-changed(val) }
+                                Button {
+                                    text: "Pause";
+                                    clicked => pause_player(node.id);
+                                }
+
+                                Button {
+                                    text: "Resume";
+                                    clicked => resume_player(node.id);
+                                }
+
+                                Button {
+                                    text: "Stop";
+                                    clicked => stop_player(node.id);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
