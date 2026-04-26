@@ -29,6 +29,12 @@ export struct UiGainNode {
     source_id: int,
 }
 
+export struct UiPitchNode {
+    id: int,
+    pitch: float,
+    source_id: int,
+}
+
 export struct UiSineOscNode {
     id: int,
     freq: string,
@@ -66,6 +72,12 @@ export component AppWindow inherits Window {
     callback add_gainer();
     callback remove_gainer(int);
     callback set_gain(int, float);
+
+    in property <[UiPitchNode]> pitchers;
+
+    callback add_pitcher();
+    callback remove_pitcher(int);
+    callback set_pitch(int, float);
 
 
     in property <[UiDistorsionNode]> distorsions;
@@ -243,6 +255,51 @@ export component AppWindow inherits Window {
                                     maximum: 3.0;
                                     value: node.gain;
                                     changed(value) => set_gain(node.id, value);
+                                }
+
+                                Text {
+                                    text: "source: ";
+                                }
+                                TextInput {
+                                    text: node.source_id;
+                                    width: 60px;
+
+                                    edited => connect(node.id, 0, self.text);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            VerticalBox {
+                Button {
+                    text: "+ Pitch Node";
+                    clicked => add_pitcher();
+                }
+
+                ListView {
+                    for node in root.pitchers : Rectangle {
+                        VerticalLayout {
+                            HorizontalLayout {
+                                Text { text: "Node: " + node.id; }
+
+                                Button {
+                                    text: "Set root";
+                                    clicked => set_root(node.id);
+                                }
+
+                                Button {
+                                    text: "X";
+                                    clicked => remove_pitcher(node.id);
+                                }
+                            }
+                            HorizontalLayout {
+                                Slider {
+                                    minimum: 0.01;
+                                    maximum: 10.0;
+                                    value: node.pitch;
+                                    changed(value) => set_pitch(node.id, value);
                                 }
 
                                 Text {

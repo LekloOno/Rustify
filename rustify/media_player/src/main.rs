@@ -1,4 +1,4 @@
-use audio_engine::{process::{ProcessThread, command::Command}, topology::node::{TopologyNode, distorsion::TopologyDistorsion, gain::TopologyGain, panning::TopologyPanning, player::TopologyPlayer, sine_osc::TopologySineOsc}};
+use audio_engine::{process::{ProcessThread, command::Command}, topology::node::{TopologyNode, distorsion::TopologyDistorsion, gain::TopologyGain, panning::TopologyPanning, pitch_shifter::TopologyPitch, player::TopologyPlayer, sine_osc::TopologySineOsc}};
 mod scanner;
 
 use slint::VecModel;
@@ -30,6 +30,9 @@ pub struct App {
 
     gainer_handles: Rc<RefCell<HashMap<i32, TopologyGain>>>,
     gainers_model: Rc<VecModel<UiGainNode>>,
+
+    pitcher_handles: Rc<RefCell<HashMap<i32, TopologyPitch>>>,
+    pitchers_model: Rc<VecModel<UiPitchNode>>,
 }
 
 impl App {
@@ -66,6 +69,11 @@ impl App {
         let gainers_model =
             Rc::new(VecModel::<UiGainNode>::default());
 
+        let pitcher_handles: Rc<RefCell<HashMap<i32, TopologyPitch>>> =
+            Rc::new(RefCell::new(HashMap::new()));
+        let pitchers_model =
+            Rc::new(VecModel::<UiPitchNode>::default());
+
         Self {
             ui,
             process_tx,
@@ -81,6 +89,8 @@ impl App {
             sine_oscs_model,
             gainer_handles,
             gainers_model,
+            pitcher_handles,
+            pitchers_model,
         }
     }
 
@@ -101,6 +111,7 @@ fn main() {
         .setup_sine_osc()
         .setup_gainer()
         .setup_distorsion()
+        .setup_pitcher()
         .run();
     
     //ui.set_pans(model.clone().into());
