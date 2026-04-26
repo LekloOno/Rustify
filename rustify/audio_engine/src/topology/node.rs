@@ -6,6 +6,7 @@ pub mod player;
 pub mod sine_osc;
 pub mod distorsion;
 pub mod gain;
+pub mod panning;
 
 static GLOBAL_ID_COUNTER: AtomicUsize = AtomicUsize::new(0);
 

@@ -1,4 +1,4 @@
-use audio_engine::{process::{ProcessThread, node::impls::{distorsion::cubic_distortion, mixer::MixerNode}}, topology::node::{TopologyNode, distorsion::TopologyDistorsion, gain::TopologyGain, player::{TopologyPlayer, command::AudioCommand}, sine_osc::TopologySineOsc}};
+use audio_engine::{process::{ProcessThread, node::impls::{distorsion::cubic_distortion, mixer::MixerNode}}, topology::node::{TopologyNode, distorsion::TopologyDistorsion, gain::TopologyGain, panning::TopologyPanning, player::{TopologyPlayer, command::AudioCommand}, sine_osc::TopologySineOsc}};
 use slint::SharedString;
 mod scanner;
 
@@ -19,12 +19,15 @@ fn main() {
     let sine_osc = TopologySineOsc::new(process_tx.clone(), 100.0, 48000.0);
     let gain = TopologyGain::new(process_tx.clone(), 1.4);
     let distorsion = TopologyDistorsion::new(process_tx.clone(), cubic_distortion);
+    let panning = TopologyPanning::new(process_tx.clone(), 0.0);
+
+    panning.node.connect(0, &distorsion.node);
 
 
     gain.node.connect(0, &decoder2.node);
     distorsion.node.connect(0, &mixer);
 
-    distorsion.node.set_root();
+    panning.node.set_root();
 
     mixer.connect(0, &decoder.node);
     mixer.connect(1, &gain.node);
