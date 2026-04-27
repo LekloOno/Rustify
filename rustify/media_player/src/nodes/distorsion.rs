@@ -91,7 +91,7 @@ impl App {
                     return;
                 };
                 
-                let _ = node.command_tx.send(DistorsionMode::from(mode).into());
+                let _ = node.command_tx.try_send(DistorsionMode::from(mode).into());
             }
         });
 

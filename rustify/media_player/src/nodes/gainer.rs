@@ -53,7 +53,7 @@ impl App {
                     return;
                 };
                 
-                let _ = node.command_tx.send(gain);
+                let _ = node.command_tx.try_send(gain);
             }
         });
 

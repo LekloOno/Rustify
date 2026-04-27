@@ -19,7 +19,7 @@ impl App {
 
                 model.push(crate::UiPlayerNode {
                     id,
-                    source_path: SharedString::from("./music\\uhoh2.mp3")
+                    source_path: SharedString::from("./music/uhoh2.mp3")
                 });
             }
         });
